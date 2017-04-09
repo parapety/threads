@@ -33,7 +33,7 @@ public class Circle extends Ellipse2D.Double {
 		color = colors[new Random().nextInt(colors.length)];
 	}
 
-	public void move(ArrayList<Circle> circles) {
+	public void move() {
 		if (!move) {
 			return;
 		}
@@ -42,16 +42,6 @@ public class Circle extends Ellipse2D.Double {
 		}
 		if (panel.getHeight() < getY() + HEIGHT || getY() <= 0) {
 			factorY *= -1;
-		}
-		for (Circle circle : circles) {
-			if (circle != this && circle.intersects(getX(), getY(), getWidth(), getHeight())) {
-				double rand = Math.random();
-				if (rand > 0.5) {
-					factorX *= -1;
-				} else {
-					factorY *= -1;
-				}
-			}
 		}
 		setFrame(getX() + 1 * factorX, getY() + 1 * factorY, WIDTH, HEIGHT);
 	}
@@ -62,5 +52,10 @@ public class Circle extends Ellipse2D.Double {
 
 	public Color getColor() {
 		return color;
+	}
+
+	public void changeDirection() {
+		factorX *= -1;
+		factorY *= -1;
 	}
 }

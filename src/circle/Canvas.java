@@ -34,7 +34,10 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
 		for (Circle circle : circles) {
-			circle.move(circles);
+			if (detectCollision(circle)) {
+				circle.changeDirection();
+			}
+			circle.move();
 			g2d.setColor(circle.getColor());
 			g2d.fill(circle);
 		}
@@ -55,6 +58,16 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 	private Circle createCircle(double x, double y) {
 		Circle circle = new Circle(this, x, y);
 		return circle;
+	}
+
+	private boolean detectCollision(Circle circle) {
+		for (Circle otherCircle : circles) {
+			if (otherCircle != circle && circle.getBounds2D().intersects(otherCircle.getBounds2D())) {
+				System.out.println(circle.x + " " + circle.y + " " + otherCircle.x + " " + otherCircle.y);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
