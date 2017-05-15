@@ -16,7 +16,7 @@ import javax.swing.Timer;
 
 public class Canvas extends JPanel implements MouseListener, ActionListener {
 
-	ArrayList<Circle> circles = new ArrayList();
+	ArrayList<CircleThread> threads = new ArrayList<CircleThread>();
 
 	Timer timer;
 
@@ -33,38 +33,52 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
-		for (Circle circle : circles) {
-			if (detectCollision(circle)) {
-				circle.changeDirection();
+		for (CircleThread thread : threads) {
+			synchronized (thread) {
+				if (detectCollision(thread.circle())) {
+					thread.circle().changeDirection();
+				}
+				thread.circle().move();
+				g2d.setColor(thread.circle().getColor());
+				g2d.fill(thread.circle());
 			}
-			circle.move();
-			g2d.setColor(circle.getColor());
-			g2d.fill(circle);
 		}
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		for (Circle circle : circles) {
-			if (circle.contains(e.getX(), e.getY())) {
-				circle.toggleMove();
-				return;
+		for (CircleThread thread : threads) {
+			if (thread.circle().contains(e.getX(), e.getY())) {
+				if (e.getClickCount() == 2) {
+					threads.remove(thread);
+					repaint();
+					return;
+				}
+				synchronized (thread) {
+					thread.notify();
+					return;
+				}
 			}
 		}
-		circles.add(createCircle(e.getX(), e.getY()));
+		threads.add(createCircle(e.getX(), e.getY()));
 		repaint();
 	}
 
-	private Circle createCircle(double x, double y) {
-		Circle circle = new Circle(this, x, y);
-		return circle;
+	private CircleThread createCircle(double x, double y) {
+		CircleThread thread = new CircleThread().setPanel(this).setPosX(x).setPosY(y);
+		thread.start();
+		return thread;
 	}
 
 	private boolean detectCollision(Circle circle) {
-		for (Circle otherCircle : circles) {
-			if (otherCircle != circle && circle.getBounds2D().intersects(otherCircle.getBounds2D())) {
-				System.out.println(circle.x + " " + circle.y + " " + otherCircle.x + " " + otherCircle.y);
-				return true;
+		for (CircleThread otherThread : threads) {
+			synchronized (otherThread) {
+				if (otherThread.circle() != circle
+						&& circle.getBounds2D().intersects(otherThread.circle().getBounds2D())) {
+					System.out.println(
+							circle.x + " " + circle.y + " " + otherThread.circle().x + " " + otherThread.circle().y);
+					return true;
+				}
 			}
 		}
 		return false;
@@ -93,5 +107,54 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		repaint();
+	}
+}
+
+class CircleThread extends Thread {
+
+	private Circle circle;
+
+	private JPanel panel;
+
+	private double posX;
+
+	private double posY;
+
+	@Override
+	public void run() {
+		synchronized (this) {
+			circle = new Circle(panel, posX, posY);
+		}
+
+		while (true) {
+			synchronized (this) {
+				try {
+					circle.toggleMove();
+					wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public CircleThread setPanel(JPanel panel) {
+		this.panel = panel;
+		return this;
+	}
+
+	public CircleThread setPosX(double posX) {
+		this.posX = posX;
+		return this;
+	}
+
+	public CircleThread setPosY(double posY) {
+		this.posY = posY;
+		return this;
+	}
+
+	public Circle circle() {
+		return circle;
 	}
 }

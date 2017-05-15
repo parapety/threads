@@ -20,7 +20,7 @@ public class Circle extends Ellipse2D.Double {
 
 	private JPanel panel;
 
-	private boolean move = true;
+	private boolean move = false;
 
 	private Color color;
 
