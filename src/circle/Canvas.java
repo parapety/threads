@@ -24,7 +24,7 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 	public Canvas() {
 		addMouseListener(this);
 		setPreferredSize(new Dimension(MainFrame.WINDOW_WIDTH, MainFrame.WINDOW_HEIGHT));
-		
+
 		timer = new Timer(20, this);
 		timer.setInitialDelay(190);
 		timer.start();
@@ -69,15 +69,17 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 		for (CircleThread otherThread : getThreads()) {
 			synchronized (otherThread) {
 				if (otherThread.circle() != circle
-						&& circle.getBounds2D().intersects(otherThread.circle().getBounds2D())) {
-					//System.out.println(
-						//	circle.x + " " + circle.y + " " + otherThread.circle().x + " " + otherThread.circle().y);
-					if(circle.isEscaping){
+						&& (circle.getBounds2D().intersects(otherThread.circle().getBounds2D())
+								|| otherThread.circle().getBounds2D().intersects(circle.getBounds2D()))) {
+					// System.out.println(
+					// circle.x + " " + circle.y + " " + otherThread.circle().x
+					// + " " + otherThread.circle().y);
+					if (circle.isEscaping) {
 						return false;
 					}
 					circle.isEscaping = true;
 					return true;
-				}else{
+				} else {
 					circle.isEscaping = false;
 				}
 			}
@@ -92,7 +94,7 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 		paint(g2);
 		int color = image.getRGB(e.getX(), e.getY());
 		g2.dispose();
-		
+
 		return color == getBackground().getRGB();
 	}
 
