@@ -10,11 +10,9 @@ import javax.swing.JPanel;
 
 public class Circle extends Ellipse2D.Double {
 
-	final int WIDTH = 50;
+	final int WIDTH = 20;
 
-	final int HEIGHT = 50;
-	
-	boolean isEscaping = false;
+	final int HEIGHT = 20;
 
 	private Color color;
 

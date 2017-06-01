@@ -2,6 +2,7 @@ package circle;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -22,10 +23,10 @@ class CircleThread extends Thread implements MouseListener {
 
 	private int factorY = 1;
 
-	private boolean shouldContinue = true;
+	public boolean shouldContinue = true;
 
-	private boolean shouldWait = false;
-
+	public boolean shouldWait = false;
+	
 	public CircleThread(JPanel panel, double x, double y) {
 		setName("kropka " + iter++);
 
@@ -67,6 +68,12 @@ class CircleThread extends Thread implements MouseListener {
 					e.printStackTrace();
 				}
 			}
+			try {
+				sleep(20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -75,22 +82,33 @@ class CircleThread extends Thread implements MouseListener {
 		factorY *= -1;
 	}
 
+	public int getFactorX() {
+		return factorX;
+	}
+
+	public int getFactorY() {
+		return factorY;
+	}
+
 	private boolean isMyEvent(MouseEvent e) {
-		if (circle().contains(e.getPoint())) {
+		if (circle.contains(e.getPoint())) {
 			return true;
 		}
 		return false;
 	}
 
-	private void move() {
+	public void move(int bumpX, int bumpY) {
 		if (panel.getWidth() < circle.getX() + circle.WIDTH || circle.getX() <= 0) {
 			factorX *= -1;
 		}
 		if (panel.getHeight() < circle.getY() + circle.HEIGHT || circle.getY() <= 0) {
 			factorY *= -1;
 		}
-		circle.setFrame(circle.getX() + 0.000001 * factorX, circle.getY() + 0.000001 * factorY, circle.WIDTH,
-				circle.HEIGHT);
+		circle.setFrame(circle.getX() + bumpX * factorX, circle.getY() + bumpY * factorY, circle.WIDTH, circle.HEIGHT);
+	}
+
+	private void move() {
+		move(1, 1);
 	}
 
 	public Circle circle() {

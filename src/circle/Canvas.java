@@ -24,7 +24,7 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 	public Canvas() {
 		addMouseListener(this);
 		setPreferredSize(new Dimension(MainFrame.WINDOW_WIDTH, MainFrame.WINDOW_HEIGHT));
-		
+
 		timer = new Timer(20, this);
 		timer.setInitialDelay(190);
 		timer.start();
@@ -36,7 +36,7 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 		Graphics2D g2d = (Graphics2D) g;
 		for (CircleThread thread : getThreads()) {
 			synchronized (thread) {
-				if (detectCollision(thread.circle())) {
+				if (detectCollision(thread)) {
 					thread.changeDirection();
 				}
 				g2d.setColor(thread.circle().getColor());
@@ -53,6 +53,7 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	static ArrayList<CircleThread> getThreads() {
 		return (ArrayList) new ArrayList(Thread.getAllStackTraces().keySet()).stream()
 				.filter(thread -> thread instanceof CircleThread).collect(Collectors.toList());
@@ -61,24 +62,29 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 	private CircleThread createCircle(double x, double y) {
 		CircleThread thread = new CircleThread(this, x, y);
 		thread.start();
+		if (detectCollision(thread)) {
+			thread.shouldContinue = false;
+		}
 		addMouseListener(thread);
 		return thread;
 	}
 
-	private boolean detectCollision(Circle circle) {
+	private boolean detectCollision(CircleThread thread) {
 		for (CircleThread otherThread : getThreads()) {
 			synchronized (otherThread) {
-				if (otherThread.circle() != circle
-						&& circle.getBounds2D().intersects(otherThread.circle().getBounds2D())) {
-					//System.out.println(
-						//	circle.x + " " + circle.y + " " + otherThread.circle().x + " " + otherThread.circle().y);
-					if(circle.isEscaping){
-						return false;
+				if (otherThread.circle() != thread.circle()) {
+					if (thread.circle().getBounds().intersects(otherThread.circle().getBounds())
+							&& !otherThread.shouldWait
+					// ||
+					// otherThread.circle().getBounds().intersects(thread.circle().getBounds())
+					) {
+						/*
+						 * if (thread.circle().isEscaping) { continue; }
+						 */
+						// thread.circle().isEscaping = true;
+						return true;
+						// thread.move(10, 10);
 					}
-					circle.isEscaping = true;
-					return true;
-				}else{
-					circle.isEscaping = false;
 				}
 			}
 		}
@@ -86,13 +92,15 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 	}
 
 	private boolean isMyEvent(MouseEvent e) {
-
+		if (SwingUtilities.isRightMouseButton(e)) {
+			return false;
+		}
 		BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics2D g2 = image.createGraphics();
 		paint(g2);
 		int color = image.getRGB(e.getX(), e.getY());
 		g2.dispose();
-		
+
 		return color == getBackground().getRGB();
 	}
 
