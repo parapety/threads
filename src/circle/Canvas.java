@@ -49,7 +49,7 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 	public void mousePressed(MouseEvent e) {
 		if (isMyEvent(e)) {
 			createCircle(e.getX(), e.getY());
-			repaint();
+			//repaint();
 		}
 	}
 
