@@ -21,6 +21,8 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 
 	Timer timer;
 
+	private boolean drawCircle = true;
+
 	public Canvas() {
 		addMouseListener(this);
 		setPreferredSize(new Dimension(MainFrame.WINDOW_WIDTH, MainFrame.WINDOW_HEIGHT));
@@ -39,8 +41,7 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 				if (detectCollision(thread)) {
 					thread.changeDirection();
 				}
-				g2d.setColor(thread.circle().getColor());
-				g2d.fill(thread.circle());
+				thread.draw(g2d);
 			}
 		}
 	}
@@ -49,18 +50,29 @@ public class Canvas extends JPanel implements MouseListener, ActionListener {
 	public void mousePressed(MouseEvent e) {
 		if (isMyEvent(e)) {
 			createCircle(e.getX(), e.getY());
-			//repaint();
+			// repaint();
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	static ArrayList<CircleThread> getThreads() {
 		return (ArrayList) new ArrayList(Thread.getAllStackTraces().keySet()).stream()
 				.filter(thread -> thread instanceof CircleThread).collect(Collectors.toList());
 	}
 
 	private CircleThread createCircle(double x, double y) {
-		CircleThread thread = new CircleThread(this, x, y);
+
+		CircleThread thread;
+		if (drawCircle) {
+			thread = new CircleThread(this, x, y);
+		} else {
+			try {
+				thread = new PlanetThread(this, x, y);
+			} catch (Exception e) {
+				System.out.println(e);
+				thread = new CircleThread(this, x, y);
+			}
+		}
+		drawCircle = !drawCircle;
 		thread.start();
 		if (detectCollision(thread)) {
 			thread.shouldContinue = false;

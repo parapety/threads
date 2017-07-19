@@ -1,5 +1,6 @@
 package circle;
 
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,24 +10,24 @@ import javax.swing.SwingUtilities;
 
 class CircleThread extends Thread implements MouseListener {
 
-	private Circle circle;
+	protected Circle circle;
 
-	private JPanel panel;
+	protected JPanel panel;
 
-	private double posX;
+	protected double posX;
 
-	private double posY;
+	protected double posY;
 
-	private static int iter = 0;
+	protected static int iter = 0;
 
-	private int factorX = 1;
+	protected int factorX = 1;
 
-	private int factorY = 1;
+	protected int factorY = 1;
 
 	public boolean shouldContinue = true;
 
 	public boolean shouldWait = false;
-	
+
 	public CircleThread(JPanel panel, double x, double y) {
 		setName("kropka " + iter++);
 
@@ -113,6 +114,11 @@ class CircleThread extends Thread implements MouseListener {
 
 	public Circle circle() {
 		return circle;
+	}
+
+	public void draw(Graphics2D g2d) {
+		g2d.setColor(circle.getColor());
+		g2d.fill(circle);
 	}
 
 	@Override

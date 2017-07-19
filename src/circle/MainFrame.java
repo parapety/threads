@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 public class MainFrame extends JFrame {
 
 	static final int WINDOW_HEIGHT = 480;
-	static final int WINDOW_WIDTH = 640;
+	static final int WINDOW_WIDTH = 480;
 
 	public MainFrame() {
 		super("Clik!");
